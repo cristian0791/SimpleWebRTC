@@ -24,6 +24,7 @@ function Peer(options) {
 
     this.id = options.id;
     this.parent = options.parent;
+    this.data = options.data;
     this.type = options.type || 'video';
     this.oneway = options.oneway || false;
     this.sharemyscreen = options.sharemyscreen || false;

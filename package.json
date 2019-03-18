@@ -43,8 +43,7 @@
     "test": "node test/selenium/index.js"
   },
   "pre-commit": [
-    "lint",
-    "validate"
+    "lint"
   ],
   "false": {}
 }

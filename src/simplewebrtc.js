@@ -91,8 +91,13 @@ function SimpleWebRTC(opts) {
                 //if (!peer) peer = peers[0]; // fallback for old protocol versions
             }
             if (!peer) {
+                var dt;
+                if(typeof message.payload !== 'undefined') {
+                    dt = message.payload.data;
+                }
                 peer = self.webrtc.createPeer({
                     id: message.from,
+                    data: dt,
                     sid: message.sid,
                     type: message.roomType,
                     enableDataChannels: self.config.enableDataChannels && message.roomType !== 'screen',
@@ -260,7 +265,7 @@ SimpleWebRTC.prototype = Object.create(WildEmitter.prototype, {
 
 SimpleWebRTC.prototype.leaveRoom = function () {
     if (this.roomName) {
-        this.connection.emit('leave');
+        this.connection.emit('leave', this.roomName);
         while (this.webrtc.peers.length) {
             this.webrtc.peers[0].end();
         }
@@ -328,7 +333,6 @@ SimpleWebRTC.prototype.joinRoom = function (name, cb) {
     var self = this;
     this.roomName = name;
     this.connection.emit('join', name, function (err, roomDescription) {
-        console.log('join CB', err, roomDescription);
         if (err) {
             self.emit('error', err);
         } else {
@@ -338,10 +342,12 @@ SimpleWebRTC.prototype.joinRoom = function (name, cb) {
                 peer;
             for (id in roomDescription.clients) {
                 client = roomDescription.clients[id];
+                var data = client.data; delete client.data;
                 for (type in client) {
                     if (client[type]) {
                         peer = self.webrtc.createPeer({
                             id: id,
+                            data: data,
                             type: type,
                             enableDataChannels: self.config.enableDataChannels && type !== 'screen',
                             receiveMedia: {
